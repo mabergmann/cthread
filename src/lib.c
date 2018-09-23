@@ -66,12 +66,12 @@ void create_scheduler_context(){
   getcontext(scheduler_context);
   scheduler_context->uc_stack.ss_sp = malloc(SIGSTKSZ);
   scheduler_context->uc_stack.ss_size = (SIGSTKSZ);
-  makecontext(scheduler_context, (void(*)(void)) scheduler, 0); 
+  makecontext(scheduler_context, (void(*)(void)) scheduler, 0);
 }
 
 TCB_t* create_main_thread(){
   TCB_t* main_tcb;
-  
+
   main_tcb = malloc(sizeof(TCB_t));
 
   main_tcb->tid=next_tid;
@@ -105,7 +105,7 @@ void initialize(){
 TCB_t* create_new_thread(void* (*start)(void*), void *arg, int prio){
   TCB_t* new_thread;
   new_thread = malloc(sizeof(TCB_t));
-  
+
   new_thread->tid = next_tid;
   next_tid++;
 
@@ -142,7 +142,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
   new_thread = create_new_thread(start, arg, prio);
 
   add_thread_to_ready(new_thread);
- 
+
   if(executing->prio > prio){ // Should be preempted
     preempt();
   }
@@ -175,6 +175,7 @@ int csignal(csem_t *sem) {
 
 int cidentify (char *name, int size) {
   strncpy (name, "Sergio Cechin - 2017/1 - Teste de compilacao.", size);
+  printf("\n\t %s", name)
   return 0;
 }
 
