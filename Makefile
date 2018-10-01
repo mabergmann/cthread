@@ -21,4 +21,4 @@ cthread:
 	$(CC) -c $(SRC_DIR)/lib.c  -o $(BIN_DIR)/lib.o && ar crs $(LIB_DIR)/libcthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/support.o
 
 clean:
-	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
+	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/libc.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~

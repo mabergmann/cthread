@@ -21,6 +21,7 @@ FILA2 queues[NUM_PRIO];
 TCB_t *executing;
 
 int next_tid = 0;
+void scheduler();
 
 bool process_queue_is_empty(){
   int i,n;
@@ -46,6 +47,14 @@ TCB_t* select_next_thread_and_unqueue(){
   }
 }
 
+void create_scheduler_context(){
+  scheduler_context = malloc(sizeof(ucontext_t));
+  getcontext(scheduler_context);
+  scheduler_context->uc_stack.ss_sp = malloc(SIGSTKSZ);
+  scheduler_context->uc_stack.ss_size = (SIGSTKSZ);
+  makecontext(scheduler_context, (void(*)(void)) scheduler, 0);
+}
+
 void scheduler(){
   TCB_t* next_thread;
   while(!process_queue_is_empty()){
@@ -53,20 +62,12 @@ void scheduler(){
     next_thread = select_next_thread_and_unqueue();
     executing = next_thread;
     executing->state = PROCST_EXEC;
-    executing->context.uc_link = malloc(sizeof(ucontext_t));
-    getcontext(executing->context.uc_link);
+    create_scheduler_context();
     printf("Scheduling %d\n", executing->tid);
-    swapcontext(scheduler_context, &(executing->context));
+    printf("uc_link = %p\n", executing->context.uc_link);
+    swapcontext(scheduler_context,&(executing->context));
     printf("Voltou\n\n");
   }
-}
-
-void create_scheduler_context(){
-  scheduler_context = malloc(sizeof(ucontext_t));
-  getcontext(scheduler_context);
-  scheduler_context->uc_stack.ss_sp = malloc(SIGSTKSZ);
-  scheduler_context->uc_stack.ss_size = (SIGSTKSZ);
-  makecontext(scheduler_context, (void(*)(void)) scheduler, 0);
 }
 
 TCB_t* create_main_thread(){
@@ -114,6 +115,7 @@ TCB_t* create_new_thread(void* (*start)(void*), void *arg, int prio){
   getcontext(&new_thread->context);
   new_thread->context.uc_stack.ss_sp = malloc(SIGSTKSZ);
   new_thread->context.uc_stack.ss_size = (SIGSTKSZ);
+  new_thread->context.uc_link = scheduler_context;
   makecontext(&new_thread->context, (void(*)(void)) start, 1, arg);
 
   return new_thread;
@@ -175,7 +177,7 @@ int csignal(csem_t *sem) {
 
 int cidentify (char *name, int size) {
   strncpy (name, "Sergio Cechin - 2017/1 - Teste de compilacao.", size);
-  printf("\n\t %s", name)
+  printf("\n\t %s", name);
   return 0;
 }
 
