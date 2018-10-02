@@ -195,18 +195,12 @@ int csetprio(int tid, int prio)
 
 int cyield(void)
 {
-    ucontext_t* end_context;
-
     if(!initialized)
         initialize();
 
     executing->state = PROCST_APTO;
 
     add_thread_to_ready(executing);
-
-    end_context = malloc(sizeof(ucontext_t));
-
-    scheduler_context->uc_link = &executing->context;
 
     swapcontext(&executing->context, scheduler_context);
     return 0;
