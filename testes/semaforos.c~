@@ -1,0 +1,48 @@
+
+#include "../include/support.h"
+#include "../include/cthread.h"
+#include <stdio.h>
+
+int i;
+csem_t semaforo;
+
+void* func0(void *arg) {
+
+	int id1 = ccreate(func1, (void *)&i, 0);
+
+	printf("Eu sou a thread ID0 vou fazer cwait e cyield \n", *((int *)arg));
+	
+	cwait(&semaforo);
+
+	cyield();
+
+	printf("Sou a thread IDO vou liberar o semaforo e terminar.\n");
+
+	csignal(&semaforo);
+
+	return;
+}
+
+void* func1(void *arg) {
+
+	printf("Eu sou a thread ID1 vou fazer cwait \n", *((int *)arg));
+	cwait(&semaforo);
+	printf("Eu sou a thread ID1 depois do cwait");
+	csignal(&semaforo);
+	printf("Eu sou a thread ID1 terminando após csignal.\n");
+	return;
+}
+
+int main(int argc, char *argv[]) {
+
+	int id0;
+	
+	printf("Eu sou a main criando de ID0 e ID1\n");
+
+	csem_init(&semaforo, 1);
+
+	id0 = ccreate(func0, (void *)&i, 0);
+
+	printf("Eu sou a main voltando para terminar o programa\n");
+}
+
