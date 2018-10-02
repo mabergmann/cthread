@@ -17,8 +17,14 @@ BIN_DIR=./bin
 SRC_DIR=./src
 
 all: cthread
-cthread:
-	$(CC) -c $(SRC_DIR)/lib.c  -o $(BIN_DIR)/lib.o && ar crs $(LIB_DIR)/libcthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/support.o
+cthread: list libc 
+	ar crs $(LIB_DIR)/libcthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/list.o $(BIN_DIR)/support.o
+
+libc:
+	$(CC) -c $(SRC_DIR)/lib.c -o $(BIN_DIR)/lib.o -I $(INC_DIR) 
+
+list:
+	$(CC) -c $(SRC_DIR)/list.c -o $(BIN_DIR)/list.o -I $(INC_DIR)
 
 clean:
 	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/libc.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~

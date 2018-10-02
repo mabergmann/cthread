@@ -6,6 +6,7 @@
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include "../include/cdata.h"
+#include "../include/list.h"
 
 typedef int bool;
 
@@ -17,19 +18,28 @@ typedef int bool;
 bool initialized = FALSE;
 ucontext_t* scheduler_context;
 
-FILA2 queues[NUM_PRIO];
+list_node* queues[NUM_PRIO];
 TCB_t *executing;
 
 int next_tid = 0;
 void scheduler();
 
-bool process_queue_is_empty(){
-  int i,n;
+TCB_t* pop_thread_by_tid(int tid){
+  int i;
+  TCB_t* thread;
   for(i=0; i<NUM_PRIO; i++){
-    n = FirstFila2(&queues[i]);
-    if(n==0){ // If it was able to set the iterator, then the queue is not empty
+    thread = pop_from_list(&queues[i], tid);
+    if(thread != NULL)
+      return thread;
+  }
+  return NULL;
+}
+
+bool process_queue_is_empty(){
+  int i;
+  for(i=0; i<NUM_PRIO; i++){
+    if(queues[i] != NULL)
       return FALSE;
-    }
   }
   return TRUE;
 }
@@ -38,12 +48,8 @@ TCB_t* select_next_thread_and_unqueue(){
   int i,n;
   TCB_t *thread;
   for(i=0; i<NUM_PRIO; i++){
-    n = FirstFila2(&queues[i]);
-    if(n==0){ // If it was able to set the iterator, then the queue is not empty
-      thread = (TCB_t*)GetAtIteratorFila2(&queues[i]);
-      DeleteAtIteratorFila2(&queues[i]);
-      return thread;
-    }
+    if (queues[i]!=NULL)
+      return pop_from_queue(&queues[i]);
   }
 }
 
@@ -58,7 +64,6 @@ void create_scheduler_context(){
 void scheduler(){
   TCB_t* next_thread;
   while(!process_queue_is_empty()){
-    // TODO: implement scheduler
     next_thread = select_next_thread_and_unqueue();
     executing = next_thread;
     executing->state = PROCST_EXEC;
@@ -87,7 +92,7 @@ TCB_t* create_main_thread(){
 void intialize_queues(){
   int i;
   for(i=0;i<NUM_PRIO;i++){
-    CreateFila2(&queues[i]);
+    queues[i]=NULL;
   }
 }
 
@@ -122,14 +127,13 @@ TCB_t* create_new_thread(void* (*start)(void*), void *arg, int prio){
 }
 
 void preempt(){
-  AppendFila2(&queues[executing->prio], (void*)executing);
+  append(&queues[executing->prio], (void*)executing);
   executing->state = PROCST_APTO;
-  printf("Going into scheduler context\n");
   swapcontext(&executing->context, scheduler_context);
 }
 
-add_thread_to_ready(TCB_t *new_thread){
-  AppendFila2(&queues[new_thread->prio], new_thread);
+void add_thread_to_ready(TCB_t *new_thread){
+  append(&(queues[new_thread->prio]), new_thread);
 }
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
@@ -142,17 +146,32 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
     return -1;
 
   new_thread = create_new_thread(start, arg, prio);
-
   add_thread_to_ready(new_thread);
 
   if(executing->prio > prio){ // Should be preempted
     preempt();
   }
-  return 0;
+  return new_thread->tid;
 }
 
 int csetprio(int tid, int prio) {
-  return -1;
+  TCB_t* thread;
+
+  if(!initialized)
+    initialize();
+
+  if(prio > 2 || prio < 0)
+    return -1;
+
+
+  thread = pop_thread_by_tid(tid);
+  if(thread == NULL) return -2;
+  add_thread_to_ready(thread);
+  if(executing->prio > prio){ // Should be preempted
+    preempt();
+  }
+
+  return 0;
 }
 
 int cyield(void) {
