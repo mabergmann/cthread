@@ -16,13 +16,8 @@ teste_vetor: teste_vetor.c $(LIB_DIR)/libcthread.a
 mandel: mandel.c $(LIB_DIR)/libcthread.a
 	$(CC) -o mandel mandel.c -L$(LIB_DIR) -lcthread -lm -Wall
 
-prodcons: prodcons.c $(LIB_DIR)/libcthread.a
-	$(CC) -o prodcons prodcons.c -L$(LIB_DIR) -lcthread -lm -Wall
-
 series: series.c $(LIB_DIR)/libcthread.a
 	$(CC) -o series series.c -L$(LIB_DIR) -lcthread -lm -Wall
-cyield: cyield.c $(LIB_DIR)/libcthread.a
-	$(CC) -o cyield cyield.c -L$(LIB_DIR) -lcthread -lm -Wall
 
 clean:
 	rm -rf exemplo mandel teste_vetor barbeiro filosofos prodcons series *.o *~
