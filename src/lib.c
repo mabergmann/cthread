@@ -94,10 +94,17 @@ void scheduler()
     TCB_t* next_thread;
     while(!process_queue_is_empty())
     {
+        printf("aqui\n");
         next_thread = select_next_thread_and_unqueue();
+
+        printf("aqui3\n");
+
         executing = next_thread;
+
         executing->state = PROCST_EXEC;
+        printf("aqui4\n");
         swapcontext(scheduler_context,&(executing->context));
+        printf("aqui2\n");
         if(executing->state == PROCST_EXEC)  // The thread finished
         {
             terminate_thread(executing);
@@ -260,15 +267,19 @@ int csem_init(csem_t *sem, int count)
 
 int cwait(csem_t *sem)
 {
+    TCB_t* waiting_thread;
+
     if(!initialized)
         initialize();
 
     if(sem->count < 1)
     {
         sem->count = sem->count - 1;
-        executing->state = PROCST_BLOQ;
 
-        AppendFila2(&(sem->fila), executing);
+        waiting_thread = malloc(sizeof(TCB_t));
+        waiting_thread = executing;
+        executing->state = PROCST_BLOQ;
+        AppendFila2(&(sem->fila), waiting_thread);
         printf("aQ\n\n");
         swapcontext(&executing->context, scheduler_context);
     }
