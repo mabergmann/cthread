@@ -26,7 +26,7 @@ void* func1(void *arg)
 {
     printf("\n\tSou a thread 1 vou criar a thread 2.\n");
 
-    ccreate(func2, (void *)&i,1);
+    ccreate(func2, (void *)&i,2);
 
     printf("\n\tSou a thread 1 vou fazer cwait e cyield.\n");
 
@@ -40,9 +40,11 @@ void* func1(void *arg)
 
     cyield();
 
+    printf("\n\tSou a thread 1 voltando e fazendo cwait\n");
+
     cwait(&semaforo);
 
-    printf("\n\tSou a thread 1 usando o semaforo pela segunda vez, e liberando");
+    printf("\n\tSou a thread 1 usando o semaforo pela segunda vez, e liberando.\n\n");
 
     csignal(&semaforo);
 
@@ -51,6 +53,9 @@ void* func1(void *arg)
 
 int main(int argc, char *argv[])
 {
+    int id1;
+    char name[85];
+
     printf("Eu sou a main iniciando o semaforo.\n");
 
     csem_init(&semaforo, 1);
@@ -59,11 +64,15 @@ int main(int argc, char *argv[])
 
     printf("Eu sou a main criando de ID1\n");
 
-    ccreate(func1, (void *)&i, 1);
+    id1 = ccreate(func1, (void *)&i, 2);
 
-    cyield();
+    cjoin(id1);
 
-    printf("Eu sou a main voltando para terminar o programa\n");
+    printf("Eu sou a main voltando e vou terminar o programa.\n");
+
+    cidentify(name,85);
+
+    printf("%s", name);
 
     return 0;
 }

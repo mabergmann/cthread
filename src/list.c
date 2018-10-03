@@ -94,4 +94,5 @@ TCB_t* remove_join_from_list(list_node_join** list, int tid){
     previous = current;
     current = current->next;
   }
+  return NULL;
 }

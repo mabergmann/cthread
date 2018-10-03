@@ -24,3 +24,7 @@ TCB_t* pop_from_list(list_node** list, int tid);
 TCB_t* pop_from_queue(list_node** list);
 
 TCB_t* remove_join_from_list(list_node_join** list, int tid);
+
+void append_join(list_node_join** list, join_t* new_value);
+
+int is_tid_in_list(list_node* list, int tid);

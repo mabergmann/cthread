@@ -58,13 +58,13 @@ bool process_queue_is_empty()
 
 TCB_t* select_next_thread_and_unqueue()
 {
-    int i,n;
-    TCB_t *thread;
+    int i;
     for(i=0; i<NUM_PRIO; i++)
     {
         if (queues[i]!=NULL)
             return pop_from_queue(&queues[i]);
     }
+    return NULL;
 }
 
 void create_scheduler_context()
@@ -94,17 +94,10 @@ void scheduler()
     TCB_t* next_thread;
     while(!process_queue_is_empty())
     {
-        printf("aqui2\n");
         next_thread = select_next_thread_and_unqueue();
-
-        printf("aqui3\n");
-
         executing = next_thread;
-
         executing->state = PROCST_EXEC;
-        printf("aqui4\n");
         swapcontext(scheduler_context,&(executing->context));
-        printf("aqui1\n");
         if(executing->state == PROCST_EXEC)  // The thread finished
         {
             terminate_thread(executing);
@@ -135,18 +128,14 @@ void intialize_queues()
         queues[i]=NULL;
     }
     terminated = NULL;
+    join_list = NULL;
 }
 
 void initialize()
 {
-    TCB_t main_tcb;
-    printf("Initializing\n");
     initialized = TRUE;
-
     create_scheduler_context();
-
     intialize_queues();
-
     executing = create_main_thread();
 }
 
@@ -171,7 +160,6 @@ TCB_t* create_new_thread(void* (*start)(void*), void *arg, int prio)
 
 void preempt()
 {
-    printf("Preempting");
     executing->state = PROCST_APTO;
     append(&queues[executing->prio], (void*)executing);
     swapcontext(&executing->context, scheduler_context);
@@ -255,7 +243,7 @@ int cjoin(int tid)
     join->thread = executing;
     join->tid = tid;
 
-    append_join(&join_list, tid);
+    append_join(&join_list, join);
     executing->state = PROCST_BLOQ;
     swapcontext(&executing->context, scheduler_context);
     return 0;
@@ -284,12 +272,10 @@ int cwait(csem_t *sem)
     if(sem->count < 1)
     {
         sem->count = sem->count - 1;
-
         waiting_thread = malloc(sizeof(TCB_t));
         waiting_thread = executing;
         executing->state = PROCST_BLOQ;
         AppendFila2((PFILA2)(sem->fila), waiting_thread);
-        printf("aQ\n\n");
         swapcontext(&executing->context, scheduler_context);
     }
     else
@@ -305,11 +291,11 @@ int csignal(csem_t *sem)
     if(!initialized)
         initialize();
 
-    if(FirstFila2((PFILA2)(sem->fila))==0)
+    if(FirstFila2(sem->fila)==0)
     {
-        add_thread_to_ready(GetAtIteratorFila2((PFILA2)(sem->fila)));
-        FirstFila2((PFILA2)(sem->fila));
-        DeleteAtIteratorFila2((PFILA2)(sem->fila));
+        add_thread_to_ready(GetAtIteratorFila2(sem->fila));
+        FirstFila2(sem->fila);
+        DeleteAtIteratorFila2(sem->fila);
         sem->count = sem->count + 1;
     }
     return 0;
@@ -317,9 +303,9 @@ int csignal(csem_t *sem)
 
 //COMPLETAR O NOME DA ROSANA E A MATRICULA.
 int cidentify (char *name, int size)
-{
-    strncpy (name, "\n\tHenrique Goetz - 274719\n\tMatheus Alan Bergmann - 274704\n\tRosana", size);
-    printf("%s", name);
+{   //84
+    strncpy (name, " Henrique Goetz - 274719\n Matheus Alan Bergmann - 274704\n Rosana Dornelles - 000000\n", size);
+
     return 0;
 }
 

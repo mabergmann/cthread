@@ -21,10 +21,10 @@ cthread: list libc
 	ar crs $(LIB_DIR)/libcthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/list.o $(BIN_DIR)/support.o
 
 libc:
-	$(CC) -c $(SRC_DIR)/lib.c -o $(BIN_DIR)/lib.o -I $(INC_DIR) 
+	$(CC) -c $(SRC_DIR)/lib.c -o $(BIN_DIR)/lib.o -I $(INC_DIR) -Wall
 
 list:
-	$(CC) -c $(SRC_DIR)/list.c -o $(BIN_DIR)/list.o -I $(INC_DIR)
+	$(CC) -c $(SRC_DIR)/list.c -o $(BIN_DIR)/list.o -I $(INC_DIR) -Wall
 
 clean:
 	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/libc.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
