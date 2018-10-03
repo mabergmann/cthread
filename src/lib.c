@@ -258,9 +258,11 @@ int cjoin(int tid)
 
 int csem_init(csem_t *sem, int count)
 {
+  if(!initialized)
+    initialize();
     sem->count = count;
 
-    CreateFila2(&(sem->fila));
+    CreateFila2((FILA2*)&(sem->fila));
 
     return 0;
 }
@@ -279,7 +281,7 @@ int cwait(csem_t *sem)
         waiting_thread = malloc(sizeof(TCB_t));
         waiting_thread = executing;
         executing->state = PROCST_BLOQ;
-        AppendFila2(&(sem->fila), waiting_thread);
+        AppendFila2((PFILA2)&(sem->fila), waiting_thread);
         printf("aQ\n\n");
         swapcontext(&executing->context, scheduler_context);
     }
@@ -296,11 +298,11 @@ int csignal(csem_t *sem)
     if(!initialized)
         initialize();
 
-    if(FirstFila2(&(sem->fila))==0)
+    if(FirstFila2((PFILA2)&(sem->fila))==0)
     {
-        add_thread_to_ready(GetAtIteratorFila2(&(sem->fila)));
-        FirstFila2(&(sem->fila));
-        DeleteAtIteratorFila2(&(sem->fila));
+        add_thread_to_ready(GetAtIteratorFila2((PFILA2)&(sem->fila)));
+        FirstFila2((PFILA2)&(sem->fila));
+        DeleteAtIteratorFila2((PFILA2)&(sem->fila));
         sem->count = sem->count + 1;
     }
     return 0;
