@@ -94,7 +94,7 @@ void scheduler()
     TCB_t* next_thread;
     while(!process_queue_is_empty())
     {
-        printf("aqui\n");
+        printf("aqui2\n");
         next_thread = select_next_thread_and_unqueue();
 
         printf("aqui3\n");
@@ -104,7 +104,7 @@ void scheduler()
         executing->state = PROCST_EXEC;
         printf("aqui4\n");
         swapcontext(scheduler_context,&(executing->context));
-        printf("aqui2\n");
+        printf("aqui1\n");
         if(executing->state == PROCST_EXEC)  // The thread finished
         {
             terminate_thread(executing);
@@ -140,12 +140,12 @@ void intialize_queues()
 void initialize()
 {
     TCB_t main_tcb;
-
+    printf("Initializing\n");
     initialized = TRUE;
 
     create_scheduler_context();
 
-    void intialize_queues();
+    intialize_queues();
 
     executing = create_main_thread();
 }
@@ -171,6 +171,7 @@ TCB_t* create_new_thread(void* (*start)(void*), void *arg, int prio)
 
 void preempt()
 {
+    printf("Preempting");
     executing->state = PROCST_APTO;
     append(&queues[executing->prio], (void*)executing);
     swapcontext(&executing->context, scheduler_context);
@@ -225,12 +226,16 @@ int csetprio(int tid, int prio)
 
 int cyield(void)
 {
+    TCB_t* thread_ced;
+
     if(!initialized)
         initialize();
 
+    thread_ced = malloc(sizeof(TCB_t));
+    thread_ced = executing;
     executing->state = PROCST_APTO;
 
-    add_thread_to_ready(executing);
+    add_thread_to_ready(thread_ced);
 
     swapcontext(&executing->context, scheduler_context);
 
@@ -258,11 +263,13 @@ int cjoin(int tid)
 
 int csem_init(csem_t *sem, int count)
 {
-  if(!initialized)
-    initialize();
+    if(!initialized)
+    {
+        initialize();
+    }
     sem->count = count;
-
-    CreateFila2((FILA2*)&(sem->fila));
+    sem->fila = malloc(sizeof(FILA2));
+    CreateFila2(sem->fila);
 
     return 0;
 }
@@ -281,7 +288,7 @@ int cwait(csem_t *sem)
         waiting_thread = malloc(sizeof(TCB_t));
         waiting_thread = executing;
         executing->state = PROCST_BLOQ;
-        AppendFila2((PFILA2)&(sem->fila), waiting_thread);
+        AppendFila2((PFILA2)(sem->fila), waiting_thread);
         printf("aQ\n\n");
         swapcontext(&executing->context, scheduler_context);
     }
@@ -298,11 +305,11 @@ int csignal(csem_t *sem)
     if(!initialized)
         initialize();
 
-    if(FirstFila2((PFILA2)&(sem->fila))==0)
+    if(FirstFila2((PFILA2)(sem->fila))==0)
     {
-        add_thread_to_ready(GetAtIteratorFila2((PFILA2)&(sem->fila)));
-        FirstFila2((PFILA2)&(sem->fila));
-        DeleteAtIteratorFila2((PFILA2)&(sem->fila));
+        add_thread_to_ready(GetAtIteratorFila2((PFILA2)(sem->fila)));
+        FirstFila2((PFILA2)(sem->fila));
+        DeleteAtIteratorFila2((PFILA2)(sem->fila));
         sem->count = sem->count + 1;
     }
     return 0;
