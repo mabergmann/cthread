@@ -286,27 +286,73 @@ int cwait(csem_t *sem)
     return 0;
 }
 
+
+void* getPriorityThread(PFILA2 fila)
+{
+
+    TCB_t *thread_ret, *thread_aux;
+
+    FirstFila2(fila);
+
+    thread_ret = GetAtIteratorFila2(fila);
+
+    while(NextFila2(fila)==0)
+    {
+        thread_aux = GetAtIteratorFila2(fila);
+        if(thread_ret->prio > thread_aux->prio)
+        {
+            thread_ret = thread_aux;
+        }
+    }
+
+    FirstFila2(fila);
+
+    while(thread_ret != GetAtIteratorFila2(fila))
+    {
+        NextFila2(fila);
+    }
+
+    DeleteAtIteratorFila2(fila);
+
+    return thread_ret;
+}
+
 int csignal(csem_t *sem)
 {
+    TCB_t* thread_apt;
+
     if(!initialized)
         initialize();
 
     if(FirstFila2(sem->fila)==0)
     {
-        add_thread_to_ready(GetAtIteratorFila2(sem->fila));
-        FirstFila2(sem->fila);
-        DeleteAtIteratorFila2(sem->fila);
+        thread_apt = getPriorityThread(sem->fila);
+        add_thread_to_ready(thread_apt);
+        //FirstFila2(sem->fila);
+        //DeleteAtIteratorFila2(sem->fila);
+        sem->count = sem->count + 1;
+
+        if(executing->prio > thread_apt->prio)
+        {
+            preempt();
+        }
+    }
+    else
+    {
         sem->count = sem->count + 1;
     }
+
     return 0;
 }
 
 //COMPLETAR O NOME DA ROSANA E A MATRICULA.
 int cidentify (char *name, int size)
-{   //84
+{
+    //84
     strncpy (name, " Henrique Goetz - 274719\n Matheus Alan Bergmann - 274704\n Rosana Dornelles - 000000\n", size);
 
     return 0;
 }
+
 
 
