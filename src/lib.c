@@ -239,6 +239,9 @@ int cjoin(int tid)
     if(is_tid_in_list(terminated, tid))
         return 0;
 
+    if(is_tid_in_list_join(join_list, tid))
+        return -1;
+
     join = malloc(sizeof(join_t));
     join->thread = executing;
     join->tid = tid;
@@ -328,8 +331,6 @@ int csignal(csem_t *sem)
     {
         thread_apt = getPriorityThread(sem->fila);
         add_thread_to_ready(thread_apt);
-        //FirstFila2(sem->fila);
-        //DeleteAtIteratorFila2(sem->fila);
         sem->count = sem->count + 1;
 
         if(executing->prio > thread_apt->prio)
@@ -348,8 +349,7 @@ int csignal(csem_t *sem)
 //COMPLETAR O NOME DA ROSANA E A MATRICULA.
 int cidentify (char *name, int size)
 {
-    //84
-    strncpy (name, " Henrique Goetz - 274719\n Matheus Alan Bergmann - 274704\n Rosana Dornelles - 000000\n", size);
+    strncpy (name, " Henrique Goetz - 274719\n Matheus Alan Bergmann - 274704\n Rosana Dornelles - 263368\n", size);
 
     return 0;
 }

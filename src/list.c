@@ -56,6 +56,15 @@ int is_tid_in_list(list_node* list, int tid){
   return 0;
 }
 
+int is_tid_in_list_join(list_node_join* list, int tid){
+  while(list){
+    if(list->join->tid == tid)
+      return 1;
+    list = list->next;
+  }
+  return 0;
+}
+
 void append_join(list_node_join** list, join_t* new_value){
   list_node_join* current;
   list_node_join* new_node;

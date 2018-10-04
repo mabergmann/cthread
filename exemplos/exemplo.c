@@ -20,7 +20,7 @@ void* func0(void *arg) {
 void* func1(void *arg) {
 	printf("Eu sou a thread ID1 imprimindo %d\n", *((int *)arg));
 	cyield();
-	printf("Eu sou a thread ID1 depois do cyield");
+	printf("Eu sou a thread ID1 depois do cyield\n");
 	return;
 }
 
@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
 	printf("Eu sou a main após a criação de ID0 e ID1\n");
 
 	csetprio(id1, 0);
+	cyield();
 	cjoin(id0);
 	cjoin(id1);
 
